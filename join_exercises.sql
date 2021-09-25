@@ -112,23 +112,22 @@ WHERE (dm.to_date > now()
 	AND de.to_date > now())
 LIMIT 100;
 -- BONUS 2
-/*SELECT CONCAT(first_name, " ", last_name),
-	dept_name as "dept",
-	MAX(salaries.salary)
-FROM departments, employees
-JOIN dept_emp ON dept_emp.dept_no = departments.dept_no
-JOIN salaries ON employees.emp_no = salaries.emp_no
-WHERE salaries.to_date > NOW()
-ORDER BY salaries.salary
-LIMIT 15;*/
 
-SELECT departments.dept_name AS "Dept",
-	MAX(salaries.salary),
-	employees.first_name
+SELECT CONCAT(first_name, " ", last_name) AS "Name",
+	salaries.salary AS "Salary",
+	departments.dept_name AS "Department"
 FROM departments
 JOIN dept_emp USING(dept_no)
 JOIN salaries USING(emp_no)
-JOIN employees ON dept_emp.emp_no = employees.emp_no
-GROUP BY Dept
-LIMIT 40;
-	
+JOIN employees USING(emp_no)
+WHERE salaries.salary IN
+(
+	SELECT MAX(salary)
+	FROM salaries
+	JOIN dept_emp USING(emp_no)
+	JOIN departments USING(dept_no)
+	GROUP BY dept_name
+)
+	AND (dept_emp.to_date > now())
+ORDER BY Department
+LIMIT 9;
